@@ -1,7 +1,7 @@
 import os, argparse
 import numpy as np
 
-parser = argparse.ArgumentParser(description='')
+parser = argparse.ArgumentParser(description='Day 5: Supply Stacks')
 parser.add_argument('input', help='Input file to read from.')
 parser.add_argument('mode', help=' 1: single block move, 2: multiple block move')
 

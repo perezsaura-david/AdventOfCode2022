@@ -1,6 +1,6 @@
 import os, argparse
 
-parser = argparse.ArgumentParser(description='Calorie counting.')
+parser = argparse.ArgumentParser(description='Day 1: Calorie Counting')
 parser.add_argument('input', help='Input file to read from.')
 parser.add_argument('mode', help='"top1" or "top3"')
 

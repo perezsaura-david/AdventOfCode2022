@@ -1,6 +1,6 @@
 import os, argparse
 
-parser = argparse.ArgumentParser(description='Rucksack reorganization')
+parser = argparse.ArgumentParser(description='Day 3: Rucksack Reorganization')
 parser.add_argument('input', help='Input file to read from.')
 parser.add_argument('mode', help='')
 

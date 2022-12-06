@@ -1,7 +1,7 @@
 import os, argparse
 import numpy as np
 
-parser = argparse.ArgumentParser(description='Camp Cleanup')
+parser = argparse.ArgumentParser(description='Day 4: Camp Cleanup')
 parser.add_argument('input', help='Input file to read from.')
 parser.add_argument('mode', help='1 or 2')
 
