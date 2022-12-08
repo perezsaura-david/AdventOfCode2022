@@ -3,11 +3,11 @@ import numpy as np
 
 class Visualizer:
     def __init__(self, n_columns, max_rows, mode):
-        print(f'columns: {n_columns}, rows: {max_rows}')
-        self.n_columns = n_columns + 1
-        self.max_rows = max_rows + 1
-        self.char_width = 20 
-        self.char_height = 20
+        self.block_type = 3
+        self.n_columns = self.block_type * n_columns + 1
+        self.max_rows = self.block_type * max_rows + 1
+        self.char_width = 10 
+        self.char_height = 10
         self.interval = 20
         self.mode = 1
 
@@ -27,26 +27,41 @@ class Visualizer:
         return
 
     def drawStorage(self):
+        self.image = 0*self.image
         for i in range(len(self.storage)):
             for j in range(len(self.storage[i])):
-                block = self.storage[i][j]
-                # print(f'block: {block}')
-                x = (i) * self.char_width
-                y = (j) * self.char_height
-                y = self.max_rows * self.char_height - y # translate to image coordinate
-                # offset to make it look better 
-                x += self.char_width // 2
-                y -= self.char_width // 2 
-                # print(f'image: {self.image.shape}')
-                # print(f'x: {x}, y: {y}')
+                if self.block_type == 1:
+                    block = self.storage[i][j]
+                    x = (i) * self.char_width
+                    y = (j) * self.char_height
+                    # translate to image coordinate
+                    y = self.max_rows * self.char_height - y 
+                    # offset to make it look better 
+                    x += self.char_width // 2
+                    y -= self.char_width // 2 
+                    self.drawBlock(block,x, y)
+                if self.block_type == 3:
+                    for k in [-1, 0, 1]:
+                        if k == 0:
+                            block = self.storage[i][j]
+                        if k == -1:
+                            block = '['
+                        if k == 1:
+                            block = ']'
+                        x = (i * self.block_type + k + 1) * self.char_width
+                        y = (j) * self.char_height * 2
+                        # translate to image coordinate
+                        y = self.max_rows * self.char_height - y 
+                        # offset to make it look better 
+                        x += self.char_width // 2
+                        y -= self.char_width // 2 
+                        self.drawBlock(block,x, y)
 
-                self.drawBlock(block,x, y)
 
-
-    def show(self):
+    def show(self, time):
         cv2.imshow('image', self.image)
         # cv2.waitKey(self.interval)
-        cv2.waitKey(0)
+        cv2.waitKey(time)
         cv2.destroyAllWindows()
 
     # def save(self, filename):

@@ -70,6 +70,17 @@ def moveBlocks(structure, move, mode):
 
     return
 
+def visualizeStorage(storage, visualizer, time):
+    visualizer.setStorage(cargo_structure)
+    visualizer.drawStorage()
+    visualizer.show(time)
+
+def getMaxRows(structure):
+    max_rows = 0
+    for column in structure:
+        if len(column) > max_rows:
+            max_rows = len(column)
+    return max_rows
 
 if __name__ == '__main__':
     args = parser.parse_args()
@@ -78,6 +89,8 @@ if __name__ == '__main__':
         print('Input file does not exist.')
         exit(1)
 
+    visualize_moves = True
+
     structure_info = []
     reconstruction = True
     with open(args.input, 'r') as f:
@@ -85,12 +98,20 @@ if __name__ == '__main__':
             if line == '\n':
                 reconstruction = False
                 cargo_structure = makeStructure(structure_info)
+                
+                if visualize_moves: 
+                    max_rows = getMaxRows(cargo_structure)
+                    visualizer = Visualizer(len(cargo_structure), max_rows ,int(args.mode))
                 continue
+
             if reconstruction:
                 structure_info.append(getStorageInfo(line))
             else:
                 move = getMoveInfo(line)
                 moveBlocks(cargo_structure, move, int(args.mode))
+                if visualize_moves:
+                    visualizeStorage(cargo_structure, visualizer, 500)
+
 
     if args.mode == '1':
         print('Solution 1')
@@ -117,9 +138,5 @@ if __name__ == '__main__':
         if len(column) > max_rows:
             max_rows = len(column)
 
-    # max_rows = 10
-
     visualizer = Visualizer(len(cargo_structure), max_rows ,int(args.mode))
-    visualizer.setStorage(cargo_structure)
-    visualizer.drawStorage()
-    visualizer.show()
+    visualizeStorage(cargo_structure, visualizer, 0)

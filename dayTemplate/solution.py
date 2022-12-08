@@ -1,8 +1,8 @@
 import os, argparse
 
-parser = argparse.ArgumentParser(description='')
+parser = argparse.ArgumentParser(description='Day 0: Template')
 parser.add_argument('input', help='Input file to read from.')
-parser.add_argument('mode', help='')
+parser.add_argument('mode', help='1 or 2')
 
 if __name__ == '__main__':
     args = parser.parse_args()
@@ -11,7 +11,6 @@ if __name__ == '__main__':
         print('Input file does not exist.')
         exit(1)
 
-    elves=[]
     with open(args.input, 'r') as f:
         for line in f:
             if line == '\n':
