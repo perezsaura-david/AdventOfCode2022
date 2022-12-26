@@ -1,6 +1,6 @@
 import os, argparse
 
-parser = argparse.ArgumentParser(description='')
+parser = argparse.ArgumentParser(description='Day 07: No Space Left On Device')
 parser.add_argument('input', help='Input file to read from.')
 parser.add_argument('mode', help='')
 
