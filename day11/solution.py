@@ -1,9 +1,12 @@
 import os, argparse
 import numpy as np
 
+MCM = 1 # From Miferco97's solution
+
 parser = argparse.ArgumentParser(description='Day 11: Monkey in the Middle')
 parser.add_argument('input', help='Input file to read from.')
 parser.add_argument('mode', help='1 or 2')
+parser.add_argument('--verbose', action='store_true', help='Show more info')
 
 class Operation:
     def __init__(self, op, arg):
@@ -88,8 +91,9 @@ class Monkey():
             return False
 
 class KeepAway():
-    def __init__(self, name):
+    def __init__(self, name, fear):
         self.monkeys = []
+        self.fear = fear
 
     def addMonkey(self, monkey):
         self.monkeys.append(monkey)
@@ -113,7 +117,10 @@ class KeepAway():
                 if item is None:
                     continue
                 item = monkey.inspection(item)
-                # item //= 3
+                if not self.fear:
+                    item //= 3
+                else:
+                    item %= MCM
                 if not monkey.testing(item):
                     next_monkey_index = 1
                 monkey_name = monkey.getNextMonkey(next_monkey_index)
@@ -152,7 +159,9 @@ if __name__ == '__main__':
                 continue
             if 'Test' in line:
                 split_line = line.split(' ')
-                monkeys[-1].setTestNumber(int(split_line[-1]))
+                test_number = int(split_line[-1])
+                monkeys[-1].setTestNumber(test_number)
+                MCM *= test_number
                 continue
             if 'true' in line:
                 line = line.strip()
@@ -162,8 +171,11 @@ if __name__ == '__main__':
                 line = line.strip()
                 monkeys[-1].setMove(int(line[-1]), 1)
                 continue
-    
-    keepaway = KeepAway('KeepAway')
+
+    if args.mode == '1':
+        keepaway = KeepAway('keepaway', False)
+    if args.mode == '2':
+        keepaway = KeepAway('keepaway', True)
 
     for monkey in monkeys:
         keepaway.addMonkey(monkey)
@@ -173,6 +185,7 @@ if __name__ == '__main__':
         # print(f'Testing: {monkey.testing(monkey.inspection())}')
         # print(f'Moves: {monkey.moves}')
 
+    rounds = 20
     rounds = 10000
 
     for i in range(rounds):
@@ -180,12 +193,13 @@ if __name__ == '__main__':
         # print(f'*** Round {i+1} ***')
         # print('***************')
         keepaway.round()
-        # if i % 1000 == 999:
-        if i % 10 == 9:
-            print(f'*** Round {i+1} ***')
-            for monkey in keepaway.getMonkeys():
-                print(f'Monkey {monkey.name} has {monkey.items}')
-                print(f'Monkey {monkey.name} has inspected {monkey.getInspections()} items')
+        if args.verbose:
+            if i % 1000 == 999 or i == 0 or i == 19:
+            # if i % 10 == 9:
+                print(f'*** Round {i+1} ***')
+                for monkey in keepaway.getMonkeys():
+                    print(f'Monkey {monkey.name} has {monkey.items}')
+                    print(f'Monkey {monkey.name} has inspected {monkey.getInspections()} items')
 
     print('***************')
     print('*** Results ***')
@@ -210,6 +224,7 @@ if __name__ == '__main__':
         print(f'Monkey business: {monkey_business}')
     elif args.mode == '2':
         print('Solution 2')
+        print(f'Monkey business: {monkey_business}')
     else:
         print('Unknown mode.')
         exit(1)

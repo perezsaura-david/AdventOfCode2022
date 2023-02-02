@@ -160,6 +160,7 @@ if __name__ == '__main__':
         exit(1)
     
     input_map = parseFile(args.input)
+    hill_map = None
 
     if "path" in args.input:
         translatePathMap(input_map)
@@ -174,6 +175,7 @@ if __name__ == '__main__':
         # map = translateMap(input_map)
         # print(input_map)
         h_map = translateMap(input_map)
+        hill_map = h_map
         # print(h_map)
         map_shape = h_map.shape
         # print(f'map_shape {map_shape}')
@@ -182,6 +184,8 @@ if __name__ == '__main__':
         height_map.show_map()
         # map_shape = input_map.shape
         # print(f'map_shape {map_shape}')
+
+    print(f'Hill map: {hill_map}')
 
 
 
