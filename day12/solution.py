@@ -2,15 +2,171 @@ import os, argparse
 from PIL import Image, ImageDraw
 import numpy as np
 import cv2
+import time
 
 parser = argparse.ArgumentParser(description='Day 12: Hill Climbing Algorithm')
 parser.add_argument('input', help='Input file to read from.')
 parser.add_argument('mode', help='1 or 2')
 
+class HillClimbing():
+
+    def __init__(self, h_map):
+        self.graph = {}
+        self.costs = {}
+        self.nodes = set()
+        self.parents = {}
+        self.map = h_map
+        self.start = None
+        self.goal = None
+        self.make_graph()
+        self.init_costs()
+        self.init_parents()
+
+        # print("Graph: ", self.graph)
+        # print("Costs: ", self.costs)
+        # print("Nodes: ", self.nodes)
+        # print("Parents: ", self.parents)
+        print("Start: ", self.start)
+        print("Goal: ", self.goal)
+
+        print("Number of nodes: ", len(self.nodes))
+        print("Number of edges: ", len(self.graph))
+        print("Number of parents: ", len(self.parents))
+
+        # Measure execution time
+        start = time.time()
+        self.dijkstra_algorithm()
+        end = time.time()
+        print("Execution time in seconds: ", end - start)
+
+        # print("Costs: ", self.costs)
+        # print("Nodes: ", self.nodes)
+        # print("Parents: ", self.parents)
+
+
+    def make_graph(self):
+        print("Making graph...")
+        # row_len = self.map.shape[0]
+        for i in range(self.map.shape[0]):
+            for j in range(self.map.shape[1]):
+                # node_id = i * row_len + j
+                # print(node_id)
+                node_id = (i, j)
+                self.nodes.add(node_id)
+                self.graph[node_id] = {}
+                self.costs[node_id] = float('inf')
+                self.parents[node_id] = None
+                node_value = self.map[i, j]
+                # print("Node id: ", node_id, "Node value: ", node_value)
+                if node_value == 0:
+                    self.start = node_id
+                if node_value == 27:
+                    self.goal = node_id
+                # Add the left cell
+                if j > 0:
+                    # print("Left node")
+                    candidate_value = self.map[i, j-1]
+                    candidate_id = (i, j-1)
+                    # candidate_id = i * row_len + j - 1
+                    diff = candidate_value - node_value
+                    # print("Node id: ", node_id, "Candidate id: ", candidate_id, "Diff: ", diff)
+                    if diff <= 1: 
+                        self.graph[node_id][candidate_id] = 1
+                # Add the right cell
+                if j < self.map.shape[1] - 1:
+                    # print("Right node")
+                    candidate_value = self.map[i, j+1]
+                    candidate_id = (i, j+1)
+                    # candidate_id = i * row_len + j + 1
+                    diff = candidate_value - node_value
+                    # print("Node id: ", node_id, "Candidate id: ", candidate_id, "Diff: ", diff)
+                    if diff <= 1:
+                        self.graph[node_id][candidate_id] = 1
+                # Add the top cell
+                if i > 0:
+                    # print("Top node")
+                    candidate_value = self.map[i-1, j]
+                    candidate_id = (i-1, j)
+                    # candidate_id = (i-1) * row_len + j
+                    diff = candidate_value - node_value
+                    # print("Node id: ", node_id, "Candidate id: ", candidate_id, "Diff: ", diff)
+                    if diff <= 1:
+                        self.graph[node_id][candidate_id] = 1
+                # Add the bottom cell
+                if i < self.map.shape[0] - 1:
+                    # print("Bottom node")
+                    candidate_value = self.map[i+1, j]
+                    candidate_id = (i+1, j)
+                    # candidate_id = (i+1) * row_len + j
+                    diff = candidate_value - node_value
+                    # print("Node id: ", node_id, "Candidate id: ", candidate_id, "Diff: ", diff)
+                    if diff <= 1:
+                        self.graph[node_id][candidate_id] = 1
+
+    def init_costs(self):
+        self.costs[self.start] = 0
+        for node in self.graph[self.start]:
+            self.costs[node] = 1
+
+    def init_parents(self):
+        for node in self.graph[self.start]:
+            self.parents[node] = self.start
+            
+    def dijkstra_algorithm(self):
+        print("Dijkstra algorithm...")
+        visited=[]
+
+        node=self.find_cheaper_node(visited)
+        while node is not None:
+            print("Visiting node: ", node)
+            node_cost = self.costs[node]
+            neighbors = self.graph[node]
+            for n in neighbors.keys():
+                print("Neighbor: ", n)
+                new_cost = node_cost+neighbors[n]
+                if self.costs[n] > new_cost:
+                    self.costs[n] = new_cost
+                    self.parents[n] = node
+            visited.append(node)
+            node = self.find_cheaper_node(visited)
+            print("Visited: ", len(visited))
+
+    def find_cheaper_node(self, visited):
+        minimum_cost = float("inf")
+        minimun_cost_node = None
+        for node in self.costs:
+            if node in visited:
+                # print("Node already visited: ", node)
+                continue
+            node_cost = self.costs[node]
+            if node_cost < minimum_cost: 
+                minimum_cost = node_cost
+                minimun_cost_node = node
+        
+        return minimun_cost_node
+    
+    def find_best_path(self): 
+        print("Finding best path...")
+      
+        path = []
+        node = self.goal 
+        
+        while node != self.start:
+            parent = self.parents[node]
+            path.append(node)
+            node = parent
+        
+        path.append(self.start)
+        
+        return path[::-1]
+
+    def get_path_steps(self):
+        return self.costs[self.goal]
+
 class Map():
     
-    def __init__(self, width, height, path):
-        self.path = path
+    def __init__(self, width, height, hmap):
+        self.map = hmap
         self.cell_size = 50
         image_width = width * (self.cell_size + 1) + 1  
         image_height = height * (self.cell_size + 1) + 1
@@ -26,10 +182,10 @@ class Map():
             self.draw.line((0, y, width * (cell_size + 1), y), fill='white')
 
     def draw_height_map(self):
-        for i in range(self.path.shape[0]):
-            for j in range(self.path.shape[1]):
+        for i in range(self.map.shape[0]):
+            for j in range(self.map.shape[1]):
                 # print((i,j), self.path[i,j])
-                self.draw_height((i,j), self.path[i,j])
+                self.draw_height((i,j), self.map[i,j])
 
     def draw_height(self, cell, height):
         y = cell[0]
@@ -41,6 +197,29 @@ class Map():
         y_limits = [(self.cell_size + 1) * y + 1, (self.cell_size + 1) * (y + 1) - 1]
         
         self.draw.rectangle((x_limits[0], y_limits[0], x_limits[1], y_limits[1]), fill=(height, height, height))
+
+    def draw_step(self, cell):
+        y = cell[0]
+        x = cell[1]
+
+        # y = cell // self.map.shape[1]
+        # x = cell % self.map.shape[1]
+
+        height = int(self.map[y,x]) * 6 + 60
+
+        x_limits = [(self.cell_size + 1) * x + 1, (self.cell_size + 1) * (x + 1) - 1]
+        y_limits = [(self.cell_size + 1) * y + 1, (self.cell_size + 1) * (y + 1) - 1]
+        
+        self.draw.rectangle((x_limits[0], y_limits[0], x_limits[1], y_limits[1]), fill=(height, 0, 0))
+
+    def draw_path(self, path):
+        print("Drawing path...")
+        for step in path:
+            # print("Drawing step: ", step)
+            self.draw_step(step)
+
+
+
 
     def draw_step_map(self):
         for i in range(self.path.shape[0]):
@@ -163,39 +342,28 @@ if __name__ == '__main__':
     hill_map = None
 
     if "path" in args.input:
+        # Show path example
         translatePathMap(input_map)
         path_shape = input_map.shape
-        # path_shape = path.shape
-        # print(f'path_shape {path_shape}')
         path_map = Map(path_shape[1], path_shape[0], input_map)
         path_map.draw_step_map()
         path_map.show_map()
+        exit(0)
 
-    else:
-        # map = translateMap(input_map)
-        # print(input_map)
-        h_map = translateMap(input_map)
-        hill_map = h_map
-        # print(h_map)
-        map_shape = h_map.shape
-        # print(f'map_shape {map_shape}')
-        height_map = Map(map_shape[1], map_shape[0], h_map)
-        height_map.draw_height_map()
-        height_map.show_map()
-        # map_shape = input_map.shape
-        # print(f'map_shape {map_shape}')
+    h_map = translateMap(input_map)
+    map_shape = h_map.shape
+    height_map = Map(map_shape[1], map_shape[0], h_map)
+    height_map.draw_height_map()
+    height_map.show_map()
+    print(f'Hill map: {h_map}')
 
-    print(f'Hill map: {hill_map}')
+    climbing = HillClimbing(h_map)
+    path = climbing.find_best_path()
+    print("Path: ", path)
+    print("Path steps: ", climbing.get_path_steps())
 
-
-
-    # climbing = HillClimbing()
-    # climbing.show_map()
-
-    with open(args.input, 'r') as f:
-        for line in f:
-            if line == '\n':
-                continue
+    height_map.draw_path(path)
+    height_map.show_map()
 
 
 
